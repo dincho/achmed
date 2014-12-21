@@ -32,3 +32,6 @@
 
 # Composer PHAR
 /composer.phar
+
+# Vagrant
+.vagrant/*

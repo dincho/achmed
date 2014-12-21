@@ -1,6 +1,6 @@
 ---
 - name: Configure dev environment
-  hosts: dev
+  hosts: devservers
   sudo: yes
   vars:
     project_path: /vagrant

@@ -33,6 +33,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     node.vm.provision "ansible" do |ansible|
       ansible.playbook = "provisioning/dev.yml"
       ansible.host_key_checking = false
+      ansible.groups = {
+        "devservers" => ["dev"]
+      }
     end
 
     node.vm.provider "virtualbox" do |vb|

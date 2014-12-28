@@ -2,8 +2,6 @@
 - name: Configure dev environment
   hosts: devservers
   sudo: yes
-  vars:
-    project_path: /vagrant
   tasks:
     - name: update apt cache
       apt: update_cache=yes
@@ -31,9 +29,6 @@
        - git
       notify:
         - restart php-fpm
-
-    - name: php5-fpm is running
-      service: name=php5-fpm state=started enabled=yes
 
     - name: install bower
       npm: name=bower global=yes state=present

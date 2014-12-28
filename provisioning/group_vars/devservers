@@ -1,0 +1,3 @@
+---
+nginx_vhost_webroot: "{{ project_path }}/web"
+

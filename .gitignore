@@ -37,3 +37,6 @@ app/SymfonyRequirements.php
 
 # Vagrant
 .vagrant/*
+
+# Build filed
+build/*

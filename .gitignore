@@ -21,6 +21,8 @@
 !bin/console
 !bin/symfony_requirements
 /vendor/
+app/check.php
+app/SymfonyRequirements.php
 
 # Assets and user uploads
 /web/bundles/

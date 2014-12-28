@@ -1,0 +1,55 @@
+---
+- name: Deploy a release
+  hosts: appservers
+  tasks:
+    - debug:
+        msg: "Deploying to {{ project_path }}/{{ version }}"
+
+    - name: Create application user
+      user: name={{ app_user }}
+
+    - name: Create project dir
+      file: 
+        path: "{{ project_path }}"
+        state: directory
+        mode: 0755
+        owner: "{{ app_user }}"
+
+    - name: Deploying application code
+      unarchive:
+        src: "{{ release_path }}"
+        dest: "{{ project_path }}/"
+        creates: "{{ project_path }}/{{ version }}"
+        copy: yes
+        mode: 0755
+        owner: "{{ app_user }}"
+
+    - name: Set correct permissions
+      file:
+        path: "{{ project_path }}/{{ version }}"
+        # mode: 0755
+        owner: "{{ app_user }}"
+        state: directory
+        recurse: true
+
+    - name: Update database
+      command: >
+        ./app/console doctrine:schema:update --force 
+      args:
+        chdir: "{{ project_path }}/{{ version }}"
+      environment:
+        SYMFONY_ENV: prod
+
+    - name: Link current release
+      file:
+        src: "{{ project_path }}/{{ version }}"
+        dest: "{{ project_path }}/current"
+        owner: "{{ app_user }}"
+        state: link
+      notify:
+        - restart php-fpm
+
+  handlers:
+    - name: restart php-fpm
+      service: name=php5-fpm state=restarted
+      sudo: yes

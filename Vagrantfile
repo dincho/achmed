@@ -45,4 +45,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     node.vm.post_up_message = "Project URL: http://achmed.dev/app_dev.php"
   end
+
+  config.vm.define "app", autostart: false do |node|
+    node.vm.box = "ubuntu/trusty32"
+    node.vm.hostname = "app.achmed.dev"
+
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = node.vm.hostname
+    end
+
+    node.vm.post_up_message = "Application URL: http://app.achmed.dev/"
+  end
 end

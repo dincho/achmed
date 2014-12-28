@@ -1,0 +1,76 @@
+---
+- name: Configuring app servers
+  hosts: appservers:devservers
+  sudo: yes
+  vars:
+    php_pool_user: "{{ app_user }}"
+    php_pool_name: "{{ project_name }}"
+    nginx_vhost_webroot: "{{ project_path }}/current/web"
+    nginx_vhost_server_name: "{{ inventory_hostname }}"
+    nginx_vhost_name: "{{ project_name }}"
+    nginx_vhost_phpfcgi_address: "unix:/var/run/php5-fpm-{{ php_pool_name }}.sock"
+  tasks:
+    - name: php5 is installed
+      apt: pkg={{ item }} state=installed
+      with_items:
+       - php5-fpm
+       - php5-cli 
+       - php5-apcu
+       - php5-mysql
+       - php5-intl
+       - php5-curl
+       - php5-imagick
+      notify:
+        - restart php-fpm
+
+    - name: pool configuration
+      template:
+        src: templates/php-pool.j2
+        dest: /etc/php5/fpm/pool.d/{{ php_pool_name }}.conf
+        mode: 0600
+      notify:
+        - restart php-fpm
+
+    - name: php5-fpm is running
+      service: name=php5-fpm state=started enabled=yes
+
+    - name: nginx is installed
+      apt: pkg=nginx state=installed
+
+    - name: default vhost does not exists
+      file: name=/etc/nginx/{{ item }}/default state=absent
+      with_items:
+        - sites-enabled
+        - sites-available
+      notify:
+        - restart nginx
+
+    - name: vhost configuration exists
+      template:
+        src: templates/nginx-vhost.j2
+        dest: /etc/nginx/sites-available/{{ nginx_vhost_name }}.conf
+        owner: www-data
+        group: www-data
+        mode: 0600
+      notify:
+        - restart nginx
+
+    - name: vhosts are enabled
+      file:
+        path: /etc/nginx/sites-enabled/{{ nginx_vhost_name }}.conf
+        src: /etc/nginx/sites-available/{{ nginx_vhost_name }}.conf
+        state: link
+        owner: www-data
+        group: www-data
+      notify:
+        - restart nginx
+
+    - name: nginx is running
+      service: name=nginx state=started enabled=yes
+
+  handlers:
+    - name: restart php-fpm
+      service: name=php5-fpm state=restarted
+
+    - name: restart nginx
+      service: name=nginx state=restarted

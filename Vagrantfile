@@ -27,7 +27,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define "dev", primary: true do |node|
     node.vm.box = "ubuntu/trusty32"
     node.vm.hostname = "achmed.dev"
-    node.vm.synced_folder ".", "/vagrant", type: "rsync", rsync__exclude: [
+    node.vm.synced_folder ".", "/home/vagrant/achmed", type: "rsync", rsync__exclude: [
     ]
 
     node.vm.provision "ansible" do |ansible|

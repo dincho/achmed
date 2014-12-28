@@ -5,6 +5,9 @@ achmed.dev
 [vagrant-appservers]
 app.achmed.dev
 
+[vagrant-dbservers]
+db.achmed.dev
+
 # Groups by role
 [devservers:children]
 vagrant-devservers
@@ -12,7 +15,11 @@ vagrant-devservers
 [appservers:children]
 vagrant-appservers
 
+[dbservers:children]
+vagrant-dbservers
+
 # Groups by location
 [vagrant:children]
 vagrant-appservers
 vagrant-devservers
+vagrant-dbservers

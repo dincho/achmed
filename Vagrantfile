@@ -56,4 +56,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     node.vm.post_up_message = "Application URL: http://app.achmed.dev/"
   end
+
+  config.vm.define "db", autostart: false do |node|
+    node.vm.box = "ubuntu/trusty32"
+    node.vm.hostname = "db.achmed.dev"
+
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = node.vm.hostname
+      vb.customize ["modifyvm", :id, "--memory", "1024"]
+    end
+  end
 end

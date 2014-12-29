@@ -66,4 +66,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.customize ["modifyvm", :id, "--memory", "1024"]
     end
   end
+
+  config.vm.define "search", autostart: false do |node|
+    node.vm.box = "ubuntu/trusty32"
+    node.vm.hostname = "search.achmed.dev"
+
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = node.vm.hostname
+    end
+  end
 end

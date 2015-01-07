@@ -1,15 +1,13 @@
 ---
 - name: Deploy a release
   hosts: appservers
-  sudo: yes
-  sudo_user: "{{ app_user }}"
   tasks:
     - debug:
         msg: "Deploying to {{ project_path }}/{{ version }}"
 
     - name: Create application user
       user: name={{ app_user }}
-      sudo_user: root
+      sudo: yes
 
     - name: Create project dir
       file: 
@@ -17,6 +15,8 @@
         state: directory
         mode: 0755
         owner: "{{ app_user }}"
+      sudo: true
+      sudo_user: "{{ app_user }}"
 
     - name: Deploying application code
       unarchive:
@@ -26,6 +26,8 @@
         copy: yes
         mode: 0755
         owner: "{{ app_user }}"
+      sudo: true
+      sudo_user: "{{ app_user }}"
 
     - name: Set correct permissions
       file:
@@ -34,6 +36,8 @@
         owner: "{{ app_user }}"
         state: directory
         recurse: true
+      sudo: true
+      sudo_user: "{{ app_user }}"
 
     - name: Update database
       command: >
@@ -42,6 +46,8 @@
         chdir: "{{ project_path }}/{{ version }}"
       environment:
         SYMFONY_ENV: prod
+      sudo: true
+      sudo_user: "{{ app_user }}"
 
     - name: Link current release
       file:
@@ -49,6 +55,8 @@
         dest: "{{ project_path }}/current"
         owner: "{{ app_user }}"
         state: link
+      sudo: true
+      sudo_user: "{{ app_user }}"
       notify:
         - restart php-fpm
 

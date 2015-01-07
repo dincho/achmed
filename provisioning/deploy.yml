@@ -1,12 +1,15 @@
 ---
 - name: Deploy a release
   hosts: appservers
+  sudo: yes
+  sudo_user: "{{ app_user }}"
   tasks:
     - debug:
         msg: "Deploying to {{ project_path }}/{{ version }}"
 
     - name: Create application user
       user: name={{ app_user }}
+      sudo_user: root
 
     - name: Create project dir
       file: 
@@ -53,3 +56,4 @@
     - name: restart php-fpm
       service: name=php5-fpm state=restarted
       sudo: yes
+      sudo_user: root

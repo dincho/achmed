@@ -5,13 +5,12 @@
   vars:
     php_pool_user: "{{ app_user }}"
     php_pool_name: "{{ project_name }}"
-    nginx_vhost_webroot: "{{ project_path }}/current/web"
     nginx_vhost_server_name: "{{ inventory_hostname }}"
     nginx_vhost_name: "{{ project_name }}"
     nginx_vhost_phpfcgi_address: "unix:/var/run/php5-fpm-{{ php_pool_name }}.sock"
   tasks:
     - name: php5 is installed
-      apt: pkg={{ item }} state=installed
+      apt: pkg={{ item }} state=installed update_cache=yes
       with_items:
        - php5-fpm
        - php5-cli 

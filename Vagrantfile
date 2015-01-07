@@ -30,14 +30,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     node.vm.synced_folder ".", "/home/vagrant/achmed", type: "rsync", rsync__exclude: [
     ]
 
-    node.vm.provision "ansible" do |ansible|
-      ansible.playbook = "provisioning/devservers.yml"
-      ansible.host_key_checking = false
-      ansible.groups = {
-        "devservers" => ["dev"]
-      }
-    end
-
     node.vm.provider "virtualbox" do |vb|
       vb.name = node.vm.hostname
       vb.customize ["modifyvm", :id, "--memory", "1024"]
@@ -74,5 +66,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     node.vm.provider "virtualbox" do |vb|
       vb.name = node.vm.hostname
     end
+  end
+
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "provisioning/site.yml"
+    ansible.host_key_checking = false
+    ansible.groups = {
+      "devservers" => ["dev"],
+      "appservers" => ["app"],
+      "dbservers" => ["db"],
+      "searchservers" => ["search"]
+    }
   end
 end

@@ -38,6 +38,16 @@
       notify:
         - restart php-fpm
 
+    - name: Create application user
+      user: name={{ app_user }}
+
+    - name: Create project dir
+      file: 
+        path: "{{ project_path }}"
+        state: directory
+        mode: 0755
+        owner: "{{ app_user }}"
+
     - name: Install asset dependencies
       command: >
         bower install --production --silent

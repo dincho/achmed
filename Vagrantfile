@@ -59,6 +59,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     node.vm.provider "virtualbox" do |vb|
       vb.name = node.vm.hostname
+      vb.customize ["modifyvm", :id, "--memory", "256"]
     end
 
     node.vm.post_up_message = "Application URL: http://app.achmed.dev/"
@@ -70,7 +71,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     node.vm.provider "virtualbox" do |vb|
       vb.name = node.vm.hostname
-      vb.customize ["modifyvm", :id, "--memory", "1024"]
+      vb.customize ["modifyvm", :id, "--memory", "256"]
     end
   end
 
@@ -80,6 +81,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     node.vm.provider "virtualbox" do |vb|
       vb.name = node.vm.hostname
+      vb.customize ["modifyvm", :id, "--memory", "256"]
     end
   end
 

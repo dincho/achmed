@@ -22,3 +22,16 @@
 
     - name: Start and enable Elasticsearch
       service: name=elasticsearch state=started enabled=yes
+
+    - name: set max memory usage to 128m
+      lineinfile:
+        dest: /etc/default/elasticsearch
+        regexp: "^ES_HEAP_SIZE="
+        insertafter: "^#ES_HEAP_SIZE="
+        line: "ES_HEAP_SIZE=128m"
+      notify:
+       - restart elasticsearch
+
+  handlers:
+    - name: restart elasticsearch
+      service: name=elasticsearch state=restarted

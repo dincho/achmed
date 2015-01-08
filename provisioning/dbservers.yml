@@ -41,6 +41,17 @@
     #need to set mysql root pass
     - meta: flush_handlers
 
+    - name: disable mysql performance schema because of high memory usage
+      ini_file:
+        dest: /etc/mysql/my.cnf
+        section: mysqld
+        option: performance_schema
+        value: off
+        mode: 0600
+        backup: yes
+      notify:
+        - restart mysql
+
     - name: mysqld is running
       service: name=mysql state=started enabled=yes
 
@@ -70,3 +81,7 @@
         - 127.0.0.1
         - ::1
         - localhost
+
+    - name: restart mysql
+      service: name=mysql state=restarted
+

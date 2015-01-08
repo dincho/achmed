@@ -34,6 +34,6 @@ vagrant rsync-auto
 
 ## Winboze users
 
-- [Install Cygwin with rsync](https://www.cygwin.com)
-- Change cygwin prefix like ```none / cygdrive binary,posix=0,user 0 0```
+- Make sure you have working ```ssh``` and ```rsync``` commands. Can be installed with [Cygwin](https://www.cygwin.com). Don't forget to add cygwin bin directory to PATH environment variable.
+- Change cygwin prefix in ```/path/to/cygwin/etc/fstab``` like ```none / cygdrive binary,posix=0,user 0 0```
 - You may need to change the ```vagrant``` password if you have issues with the public key and SQL clients tunneling

@@ -1,11 +1,6 @@
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
-$ms_provisioning = <<SCRIPT
-cd /home/vagrant/achmed/provisioning
-ansible-playbook -i inventary/dev --connection=local --limit devservers site.yml
-SCRIPT
-
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   if Vagrant.has_plugin?("HostManager")
     # Update /etc/hosts file on the host machine
@@ -47,7 +42,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
 
     if Vagrant::Util::Platform.windows?
-      node.vm.provision :shell, inline: $ms_provisioning, privileged: false
+      node.vm.provision :shell, path: "provisioning/generic-provision.sh", privileged: false
     end
 
     node.vm.post_up_message = "Project URL: http://achmed.dev/app_dev.php"

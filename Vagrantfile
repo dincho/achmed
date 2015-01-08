@@ -2,16 +2,22 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  # Update /etc/hosts file on the host machine
-  config.hostmanager.enabled = true
-  config.hostmanager.manage_host = true
-  # Custom resolver for hostmanager so that dhcp IP addresses are used
-  config.hostmanager.ip_resolver = proc do |machine|
-    result = ""
-    machine.communicate.execute("ifconfig eth1") do |type, data|
-      result << data if type == :stdout
+  if Vagrant.has_plugin?("HostManager")
+    # Update /etc/hosts file on the host machine
+    config.hostmanager.enabled = true
+    config.hostmanager.manage_host = true
+    # Custom resolver for hostmanager so that dhcp IP addresses are used
+    config.hostmanager.ip_resolver = proc do |machine|
+      result = ""
+
+      begin
+        machine.communicate.execute("ifconfig eth1") do |type, data|
+          result << data if type == :stdout
+        end
+        (ip = /^\s*inet .*?(\d+\.\d+\.\d+\.\d+)\s+/.match(result)) && ip[1]
+      rescue
+      end
     end
-    (ip = /^\s*inet .*?(\d+\.\d+\.\d+\.\d+)\s+/.match(result)) && ip[1]
   end
 
   # Create a private network, which allows host-only access to the machine

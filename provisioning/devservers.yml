@@ -81,7 +81,7 @@
 
     - name: Install database
       command: >
-        {{ project_path }}/app/console doctrine:schema:update --force
+        php {{ project_path }}/app/console doctrine:schema:update --force
       sudo: no
 
   handlers:

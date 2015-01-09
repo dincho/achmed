@@ -1,5 +1,5 @@
 ---
-- include: devservers.yml
+- include: appservers.yml
 - include: dbservers.yml
 - include: searchservers.yml
-- include: appservers.yml
+- include: devservers.yml

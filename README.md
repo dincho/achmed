@@ -37,3 +37,10 @@ vagrant rsync-auto
 - Make sure you have working ```ssh``` and ```rsync``` commands. Can be installed with [Cygwin](https://www.cygwin.com). Don't forget to add cygwin bin directory to PATH environment variable.
 - Change cygwin prefix in ```/path/to/cygwin/etc/fstab``` like ```none / cygdrive binary,posix=0,user 0 0```
 - You may need to change the ```vagrant``` password if you have issues with the public key and SQL clients tunneling
+
+## Setup new project
+
+- Edit ```PROJECT_NAME``` in Vagrantfile
+- Edit ```name``` in bower.json
+- Edit ```project_name``` and ```build_repo``` in provisioning/group_vars/all/vars
+- Edit provisioning/inventary/dev to reflect your archirecture inventary

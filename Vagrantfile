@@ -1,5 +1,6 @@
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
+PROJECT_NAME = "achmed"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   if Vagrant.has_plugin?("HostManager")
@@ -32,8 +33,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.define "dev", primary: true do |node|
     node.vm.box = "ubuntu/trusty32"
-    node.vm.hostname = "achmed.dev"
-    node.vm.synced_folder ".", "/home/vagrant/achmed", type: "rsync", rsync__exclude: [
+    node.vm.hostname = PROJECT_NAME + ".dev"
+    node.vm.synced_folder ".", "/home/vagrant/" + PROJECT_NAME, type: "rsync", rsync__exclude: [
     ]
 
     node.vm.provider "virtualbox" do |vb|
@@ -42,27 +43,31 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
 
     if Vagrant::Util::Platform.windows?
-      node.vm.provision :shell, path: "provisioning/generic-provision.sh", privileged: false
+        node.vm.provision "shell" do |s|
+          s.path = "provisioning/generic-provision.sh"
+          s.privileged = false
+          s.args   = [PROJECT_NAME]
+      end
     end
 
-    node.vm.post_up_message = "Project URL: http://achmed.dev/app_dev.php"
+    node.vm.post_up_message = "Project URL: http://" + PROJECT_NAME + ".dev/app_dev.php"
   end
 
   config.vm.define "app", autostart: false do |node|
     node.vm.box = "ubuntu/trusty32"
-    node.vm.hostname = "app.achmed.dev"
+    node.vm.hostname = "app." + PROJECT_NAME + ".dev"
 
     node.vm.provider "virtualbox" do |vb|
       vb.name = node.vm.hostname
       vb.customize ["modifyvm", :id, "--memory", "256"]
     end
 
-    node.vm.post_up_message = "Application URL: http://app.achmed.dev/"
+    node.vm.post_up_message = "Application URL: http://app." + PROJECT_NAME + ".dev/"
   end
 
   config.vm.define "db", autostart: false do |node|
     node.vm.box = "ubuntu/trusty32"
-    node.vm.hostname = "db.achmed.dev"
+    node.vm.hostname = "db." + PROJECT_NAME + ".dev"
 
     node.vm.provider "virtualbox" do |vb|
       vb.name = node.vm.hostname
@@ -72,7 +77,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.define "search", autostart: false do |node|
     node.vm.box = "ubuntu/trusty32"
-    node.vm.hostname = "search.achmed.dev"
+    node.vm.hostname = "search." + PROJECT_NAME + ".dev"
 
     node.vm.provider "virtualbox" do |vb|
       vb.name = node.vm.hostname

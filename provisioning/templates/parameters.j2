@@ -4,9 +4,9 @@ parameters:
     database_driver:   pdo_mysql
     database_host:     {{ parameters.database_host | default('127.0.0.1') }}
     database_port:     {{ parameters.database_post | default(3306) }}
-    database_name:     {{ parameters.database_name | default('achmed') }}
-    database_user:     {{ parameters.database_user | default('achmed') }}
-    database_password: {{ parameters.database_password | default('achmed') }}
+    database_name:     {{ parameters.database_name | default('symfony') }}
+    database_user:     {{ parameters.database_user | default('symfony') }}
+    database_password: {{ parameters.database_password | default('symfony') }}
     # You should uncomment this if you want use pdo_sqlite
     # database_path: "%kernel.root_dir%/data.db3"
 

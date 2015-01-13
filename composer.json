@@ -37,7 +37,11 @@
         ]
     },
     "config": {
-        "bin-dir": "bin"
+        "bin-dir": "bin",
+        "process-timeout": 600,
+        "optimize-autoloader": true,
+        "discard-changes": true,
+        "notify-on-install": false
     },
     "minimum-stability": "stable",
     "extra": {

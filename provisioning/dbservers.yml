@@ -46,7 +46,7 @@
         dest: /etc/mysql/my.cnf
         section: mysqld
         option: performance_schema
-        value: off
+        value: "off"
         mode: 0600
         backup: yes
       notify:

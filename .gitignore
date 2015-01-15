@@ -13,7 +13,8 @@
 # Parameters
 /app/config/parameters.yml
 /app/config/parameters.ini
-/provisioning/group_vars/all/secrets
+
+/provisioning/group_vars/all/vars.local
 
 # Managed by Composer
 /app/bootstrap.php.cache

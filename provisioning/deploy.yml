@@ -1,67 +1,66 @@
 ---
 - name: Deploy a release
   hosts: appservers
+  sudo: true
+  sudo_user: "{{ app_user }}"
+  vars:
+    deploy_path: "{{ project_path}}/{{ version }}"
   tasks:
     - debug:
-        msg: "Deploying to {{ project_path }}/{{ version }}"
+        msg: "Deploying to {{ deploy_path }}"
 
     - name: Create application user
       user: name={{ app_user }}
-      sudo: yes
+      sudo_user: root
 
-    - name: Create project dir
+    - name: Create deploy path
       file: 
-        path: "{{ project_path }}"
+        path: "{{ deploy_path }}"
         state: directory
         mode: 0755
         owner: "{{ app_user }}"
-      sudo: true
-      sudo_user: "{{ app_user }}"
 
     - name: Deploying application code
       unarchive:
         src: "{{ release_path }}"
-        dest: "{{ project_path }}/"
-        creates: "{{ project_path }}/{{ version }}"
+        dest: "{{ deploy_path }}"
+        creates: "{{ deploy_path }}/vendor"
         copy: yes
         mode: 0755
         owner: "{{ app_user }}"
-      sudo: true
-      sudo_user: "{{ app_user }}"
 
     - name: Set correct permissions
       file:
-        path: "{{ project_path }}/{{ version }}"
+        path: "{{ deploy_path }}"
         # mode: 0755
         owner: "{{ app_user }}"
         state: directory
         recurse: true
-      sudo: true
-      sudo_user: "{{ app_user }}"
+
+    - name: configuration
+      template:
+        src: templates/parameters.j2
+        dest: "{{ deploy_path }}/app/config/parameters.yml"
+        mode: 0600
 
     - name: Update database
       command: >
-        ./app/console doctrine:schema:update --force 
+        ./app/console doctrine:schema:update --force
       args:
-        chdir: "{{ project_path }}/{{ version }}"
+        chdir: "{{ deploy_path }}"
       environment:
         SYMFONY_ENV: prod
-      sudo: true
-      sudo_user: "{{ app_user }}"
 
     - name: Link current release
       file:
-        src: "{{ project_path }}/{{ version }}"
+        src: "{{ deploy_path }}"
         dest: "{{ project_path }}/current"
         owner: "{{ app_user }}"
         state: link
-      sudo: true
-      sudo_user: "{{ app_user }}"
       notify:
         - restart php-fpm
 
   handlers:
     - name: restart php-fpm
       service: name=php5-fpm state=restarted
-      sudo: yes
       sudo_user: root

@@ -4,79 +4,61 @@
   connection: local
   gather_facts: no
   vars:
-    build_branch: master
-    build_dir: "../build/{{ build_branch }}/{{ version }}"
-    paramters_path: templates/parameters.j2
-    parameters:
-      version: "{{ version }}"
-      database_host: "{{ hostvars[groups['dbservers'][0]]['inventory_hostname'] }}"
+    build_dir: "{{ project_source_path }}/build"
+    build_name: "{{ version }}"
   tasks:
-    - name: Pull sources from the repository.
-      git:
-        repo: "{{ build_repo }}"
-        dest: "{{ build_dir }}"
-        version: "{{ build_branch }}"
-      notify:
-        - create archive
+    - name: Check if bower.json exists
+      stat:
+        path: "{{ project_source_path }}/bower.json"
+      register: bower_json
 
     - name: Run bower install
       command: >
         bower install --production --silent
       args:
-        chdir: "{{ build_dir }}"
-        creates: "{{ build_dir }}/bower_components"
+        chdir: "{{ project_source_path }}"
+        creates: "{{ project_source_path }}/bower_components"
+      when: bower_json.stat.exists == true
       notify:
         - create archive
 
     - name: Install composer
       get_url: 
         url: https://getcomposer.org/composer.phar
-        dest: "{{ build_dir }}/composer.phar"
+        dest: "{{ project_source_path }}/composer.phar"
         mode: 0755
         validate_certs: no
-      notify:
-        - create archive
 
     - name: Run composer install
       command: >
-        ./composer.phar install 
+        "php {{ project_source_path}}/composer.phar install 
         --no-dev  --ignore-platform-reqs --no-interaction
-        --prefer-dist --optimize-autoloader --quiet
+        --prefer-dist --optimize-autoloader --quiet"
       args:
-        chdir: "{{ build_dir }}"
-        creates: "{{ build_dir }}/vendor"
+        chdir: "{{ project_source_path }}"
+        creates: "{{ project_source_path }}/vendor"
       environment:
         SYMFONY_ENV: prod
       notify:
         - create archive
 
-    - name: get cache dirs
-      shell: "ls -1 {{ build_dir }}/app/cache"
-      register: cache
-
-    - name: Remove cache
-      file:
-        name: "{{ build_dir }}/app/cache/{{ item }}"
-        state: absent
-      with_items: cache.stdout_lines
-      notify:
-        - create archive
-
-    - name: configuration
-      template:
-        src: "{{ paramters_path }}"
-        dest: "{{ build_dir }}/app/config/parameters.yml"
-        mode: 0600
-      notify:
-        - create archive
-
     - name: set archive path
       set_fact:
-        build_archive_path: "{{ build_dir }}/../{{ version }}.tar.bz2"
+        build_archive_path: "{{ build_dir }}/{{ build_name }}.tar.bz2"
 
     - name: Dump build archive path
       debug: var=build_archive_path
 
   handlers:
     - name: create archive
-      command: "tar -jcf {{ build_archive_path }} -C {{ build_dir }}/../ {{ version }}"
+      command: >
+        tar -jcf {{ build_archive_path }} -C {{ project_source_path }}
+        --exclude='build/*'
+        --exclude='.git/*'
+        --exclude='.vagrant/*'
+        --exclude='Vagrantfile'
+        --exclude='provisioning/*'
+        --exclude='bin/*'
+        --exclude='web/uploads/*'
+        --exclude='app/logs/*'
+        .

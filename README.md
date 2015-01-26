@@ -42,7 +42,7 @@ vagrant rsync-auto
 
 - Edit ```PROJECT_NAME``` in Vagrantfile
 - Edit ```name``` in bower.json
-- Edit ```project_name``` and ```build_repo``` in provisioning/group_vars/all/vars
+- Edit ```project_name``` in provisioning/group_vars/all/vars
 - Edit provisioning/inventary/dev to reflect your archirecture inventary
 - Copy provisioning/group_vars/all/secrets.dist to provisioning/group_vars/all/secrets and update it to configure your project specifics
 

@@ -1,4 +1,3 @@
 ---
 project_name: achmed
 project_path: /home/{{ app_user }}/{{ project_name }}
-build_repo: git@github.com:dincho/achmed.git

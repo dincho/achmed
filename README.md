@@ -47,7 +47,8 @@ vagrant rsync-auto
 - Copy provisioning/group_vars/all/secrets.dist to provisioning/group_vars/all/secrets and update it to configure your project specifics
 
 ## Deploy
-
-- cd /path/to/project/provisioning
-- RELEASE_VERSION=`date -u +%Y%m%d%H%M%S`
-- ansible-playbook -i inventary/dev release.yml --extra-vars="version=$RELEASE_VERSION project_source_path=/absolute/path/to/project/"
+```bash
+cd /path/to/project/provisioning
+RELEASE_VERSION=`date -u +%Y%m%d%H%M%S`
+ansible-playbook -i inventary/dev release.yml --extra-vars="version=$RELEASE_VERSION project_source_path=/absolute/path/to/project/"
+```

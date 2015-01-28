@@ -11,6 +11,7 @@
   tasks:
     - name: Create application user
       user: name={{ app_user }}
+      shell: /bin/bash
       sudo: yes
 
     - name: php5 is installed

@@ -1,19 +1,4 @@
 
 # This file is a "template" of what your parameters.yml file should look like
 parameters:
-    database_driver:   {{ symfony_params.database_driver | default('pdo_mysql') }}
-    database_host:     {{ symfony_params.database_host | default('127.0.0.1') }}
-    database_port:     {{ symfony_params.database_post | default(3306) }}
-    database_name:     {{ symfony_params.database_name | default('symfony') }}
-    database_user:     {{ symfony_params.database_user | default('symfony') }}
-    database_password: {{ symfony_params.database_password | default('symfony') }}
-
-    mailer_transport:  {{ symfony_params.mailer_transport | default('smtp') }}
-    mailer_host:       {{ symfony_params.mailer_host | default('127.0.0.1') }}
-    mailer_user:       {{ symfony_params.mailer_user | default('~') }}
-    mailer_password:   {{ symfony_params.mailer_password | default('~') }}
-
-    locale:            {{ symfony_params.locale | default('en') }}
-
-    # A secret key that's used to generate certain security-related tokens
-    secret:            {{ symfony_params.secret | default('ThisTokenIsNotSoSecretChangeIt') }}
+    version: "{{ version | default(1) }}"

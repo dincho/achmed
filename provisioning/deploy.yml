@@ -43,13 +43,18 @@
         dest: "{{ deploy_path }}/app/config/parameters.yml"
         mode: 0600
 
+    - name: environment configuration
+      template:
+        src: templates/.bash_profile
+        dest: "~/.bash_profile"
+        mode: 0600
+
     - name: Update database
       command: >
         ./app/console doctrine:schema:update --force
       args:
         chdir: "{{ deploy_path }}"
-      environment:
-        SYMFONY_ENV: prod
+      environment: symfony_env
 
     - name: Link current release
       file:

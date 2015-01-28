@@ -10,8 +10,9 @@
     nginx_vhost_phpfcgi_address: "unix:/var/run/php5-fpm-{{ php_pool_name }}.sock"
   tasks:
     - name: Create application user
-      user: name={{ app_user }}
-      shell: /bin/bash
+      user:
+        name: "{{ app_user }}"
+        shell: /bin/bash
       sudo: yes
 
     - name: php5 is installed

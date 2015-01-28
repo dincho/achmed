@@ -21,8 +21,9 @@
       npm: name=bower global=yes state=present
 
     - name: Create application user
-      user: name={{ app_user }}
-      shell: /bin/bash
+      user:
+        name: "{{ app_user }}"
+        shell: /bin/bash
 
     - name: Create project dir
       file: 

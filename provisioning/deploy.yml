@@ -10,7 +10,9 @@
         msg: "Deploying to {{ deploy_path }}"
 
     - name: Create application user
-      user: name={{ app_user }}
+      user:
+        name: "{{ app_user }}"
+        shell: /bin/bash
       sudo_user: root
 
     - name: Create deploy path

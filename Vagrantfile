@@ -59,7 +59,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     node.vm.provider "virtualbox" do |vb|
       vb.name = node.vm.hostname
-      vb.customize ["modifyvm", :id, "--memory", "256"]
+      vb.customize ["modifyvm", :id, "--memory", "512"]
     end
 
     node.vm.post_up_message = "Application URL: http://app." + PROJECT_NAME + ".dev/"

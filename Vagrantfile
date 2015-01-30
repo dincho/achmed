@@ -35,6 +35,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     node.vm.box = "ubuntu/trusty32"
     node.vm.hostname = PROJECT_NAME + ".dev"
     node.vm.synced_folder ".", "/home/vagrant/" + PROJECT_NAME, type: "rsync", rsync__exclude: [
+      ".git/",
+      ".vagrant/",
+      "var/",
+      "vendor/",
+      "bin/",
+      "web/bundles/",
+      "web/uploads/",
     ]
 
     node.vm.provider "virtualbox" do |vb|

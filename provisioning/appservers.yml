@@ -1,81 +1,85 @@
 ---
 - name: Configuring app servers
-  hosts: appservers:devservers
+  hosts: appservers
   sudo: yes
+
   vars:
-    php_pool_user: "{{ app_user }}"
-    php_pool_name: "{{ project_name }}"
-    nginx_vhost_server_name: "{{ inventory_hostname }}"
-    nginx_vhost_name: "{{ project_name }}"
-    nginx_vhost_phpfcgi_address: "unix:/var/run/php5-fpm-{{ php_pool_name }}.sock"
-  tasks:
+    php_fpm_apt_packages:
+      - php5-fpm
+      - php5-cli 
+      - php5-apcu
+      - php5-mysql
+      - php5-intl
+      - php5-curl
+      - php5-imagick
+
+    php_fpm_pools:
+      - name: achmed
+        user: achmed
+        group: achmed
+        listen: /var/run/php5-fpm-achmed.sock
+        listen.owner: www-data
+        listen.group: www-data
+        listen.mode: "0660"
+
+    php_fpm_ini:
+      # PHP section directives
+      - option: "error_reporting"
+        section: "PHP"
+        value: "E_ALL"
+      - option: "display_errors"
+        section: "PHP"
+        value: "Off"
+      - option: "display_startup_errors"
+        section: "PHP"
+        value: "Off"
+      - option: "log_errors"
+        section: "PHP"
+        value: "On"
+      - option: "date.timezone"
+        section: "PHP"
+        value: "UTC"
+
+    nginx_ubuntu_pkg:
+      - nginx
+
+    nginx_sites:
+      achmed-master:
+         - listen 80
+         - server_name {{ inventory_hostname }}
+         - root /home/achmed/master/current/web
+         - access_log /var/log/nginx/{{ inventory_hostname }}.access_log
+         - error_log /var/log/nginx/{{ inventory_hostname }}.error_log
+         - "location / { try_files $uri /app.php$is_args$args; }"
+         -  location ~ ^/(app)\.php(/|$) {
+            fastcgi_pass unix:/var/run/php5-fpm-achmed.sock;
+            fastcgi_split_path_info ^(.+\.php)(/.*)$;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            fastcgi_param HTTPS off;
+            internal;
+          }
+      achmed-wildcard:
+         - listen 80
+         - "server_name ~^(?<subdomain>.*).{{ inventory_hostname }}$"
+         - root /home/achmed/$subdomain/current/web
+         - access_log /var/log/nginx/wildcard.{{ inventory_hostname }}.access_log
+         - error_log /var/log/nginx/wildcard.{{ inventory_hostname }}.error_log
+         - "location / { try_files $uri /app.php$is_args$args; }"
+         - location ~ ^/(app)\.php(/|$) {
+            fastcgi_pass unix:/var/run/php5-fpm-achmed.sock;
+            fastcgi_split_path_info ^(.+\.php)(/.*)$;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            fastcgi_param HTTPS off;
+            internal;
+          }
+
+  roles: [nbz4live.php-fpm, jdauphant.nginx]
+
+  pre_tasks:
     - name: Create application user
       user:
-        name: "{{ app_user }}"
+        name:  achmed
         shell: /bin/bash
       sudo: yes
-
-    - name: php5 is installed
-      apt: pkg={{ item }} state=installed update_cache=yes
-      with_items:
-       - php5-fpm
-       - php5-cli 
-       - php5-apcu
-       - php5-mysql
-       - php5-intl
-       - php5-curl
-       - php5-imagick
-      notify:
-        - restart php-fpm
-
-    - name: pool configuration
-      template:
-        src: templates/php-pool.j2
-        dest: /etc/php5/fpm/pool.d/{{ php_pool_name }}.conf
-        mode: 0600
-      notify:
-        - restart php-fpm
-
-    - name: php5-fpm is running
-      service: name=php5-fpm state=started enabled=yes
-
-    - name: nginx is installed
-      apt: pkg=nginx state=installed
-
-    - name: default vhost does not exists
-      file: name=/etc/nginx/{{ item }}/default state=absent
-      with_items:
-        - sites-enabled
-        - sites-available
-      notify:
-        - restart nginx
-
-    - name: vhost configuration exists
-      template:
-        src: templates/nginx-vhost.j2
-        dest: /etc/nginx/sites-available/{{ nginx_vhost_name }}.conf
-        owner: www-data
-        group: www-data
-        mode: 0600
-      notify:
-        - restart nginx
-
-    - name: vhosts are enabled
-      file:
-        path: /etc/nginx/sites-enabled/{{ nginx_vhost_name }}.conf
-        src: /etc/nginx/sites-available/{{ nginx_vhost_name }}.conf
-        state: link
-        owner: www-data
-        group: www-data
-      notify:
-        - restart nginx
-
-    - name: nginx is running
-      service: name=nginx state=started enabled=yes
-
-  handlers:
-    - name: restart php-fpm
-      service: name=php5-fpm state=restarted
-
-    - name: restart nginx
-      service: name=nginx state=restarted

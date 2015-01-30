@@ -1,36 +1,78 @@
 ---
-- name: Configure dev environment
+- name: Configuring dev servers
   hosts: devservers
   sudo: yes
-  tasks:
-    - name: update apt cache
-      apt: update_cache=yes
 
-    - name: install xdebug, nodejs, npm, compass, git
+  vars:
+    php_fpm_apt_packages:
+      - php5-fpm
+      - php5-cli 
+      - php5-apcu
+      - php5-mysql
+      - php5-intl
+      - php5-curl
+      - php5-imagick
+      - php5-xdebug
+
+    php_fpm_pools:
+      - name: vagrant
+        user: vagrant
+        group: vagrant
+        listen: /var/run/php5-fpm-vagrant.sock
+        listen.owner: www-data
+        listen.group: www-data
+        listen.mode: "0660"
+
+    php_fpm_ini:
+      # PHP section directives
+      - option: "error_reporting"
+        section: "PHP"
+        value: "E_ALL"
+      - option: "display_errors"
+        section: "PHP"
+        value: "on"
+      - option: "display_startup_errors"
+        section: "PHP"
+        value: "on"
+      - option: "log_errors"
+        section: "PHP"
+        value: "On"
+      - option: "date.timezone"
+        section: "PHP"
+        value: "UTC"
+
+    nginx_ubuntu_pkg:
+      - nginx
+
+    nginx_sites:
+      vagrant:
+         - listen 80
+         - server_name {{ inventory_hostname }}
+         - root /home/vagrant/web
+         - access_log /var/log/nginx/{{ inventory_hostname }}.access_log
+         - error_log /var/log/nginx/{{ inventory_hostname }}.error_log
+         - "location / { try_files $uri /app.php$is_args$args; }"
+         -  location ~ ^/(app|app_dev|config)\.php(/|$) {
+            fastcgi_pass unix:/var/run/php5-fpm-vagrant.sock;
+            fastcgi_split_path_info ^(.+\.php)(/.*)$;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            fastcgi_param HTTPS off;
+          }
+
+  roles: [nbz4live.php-fpm, jdauphant.nginx]
+
+  post_tasks:
+    - name: install nodejs, npm, compass, git
       apt: pkg={{ item }} state=installed
       with_items:
-       - php5-xdebug
-       - npm
        - nodejs-legacy
+       - npm
        - ruby-compass
        - git
-      notify:
-        - restart php-fpm
 
     - name: install bower
       npm: name=bower global=yes state=present
-
-    - name: Create application user
-      user:
-        name: "{{ app_user }}"
-        shell: /bin/bash
-
-    - name: Create project dir
-      file: 
-        path: "{{ project_path }}"
-        state: directory
-        mode: 0755
-        owner: "{{ app_user }}"
 
     - name: Install asset dependencies
       command: >
@@ -57,17 +99,11 @@
     - name: Install dependencies
       command: >
         {{ project_path }}/composer.phar install --no-interaction
-        --prefer-dist --optimize-autoloader
       args:
         chdir: "{{ project_path }}"
-        creates: "{{ project_path }}/vendor"
       sudo: no
 
     - name: Install database
       command: >
         php {{ project_path }}/app/console doctrine:schema:update --force
       sudo: no
-
-  handlers:
-    - name: restart php-fpm
-      service: name=php5-fpm state=restarted

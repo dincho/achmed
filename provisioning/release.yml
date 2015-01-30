@@ -1,3 +1,0 @@
----
-- include: build.yml
-- include: deploy.yml release_path="{{ hostvars['127.0.0.1']['build_archive_path'] }}"

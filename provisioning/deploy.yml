@@ -1,73 +1,49 @@
 ---
 - name: Deploy a release
   hosts: appservers
-  sudo: true
-  sudo_user: "{{ app_user }}"
+  remote_user: achmed
+
   vars:
-    deploy_path: "{{ project_path}}/{{ version }}"
-  tasks:
-    - debug:
-        msg: "Deploying to {{ deploy_path }}"
+    project_root: "/home/achmed/master/"
+    project_deploy_strategy: git
+    project_git_repo: git@github.com:dincho/achmed.git
+    project_has_composer: true
+    project_has_bower: true
+    project_composer_binary: composer
+    project_command_for_composer_install: >
+      {{ project_composer_binary }} install --no-ansi --no-dev --no-interaction 
+      --no-progress --optimize-autoloader --no-scripts --prefer-dist
 
-    - name: Create application user
-      user:
-        name: "{{ app_user }}"
-        shell: /bin/bash
-      sudo_user: root
+    project_templates:
+      - src: "{{ project_parameters_template | default('templates/parameters.j2') }}"
+        dest: app/config/parameters.yml
 
-    - name: Create deploy path
-      file: 
-        path: "{{ deploy_path }}"
-        state: directory
-        mode: 0755
-        owner: "{{ app_user }}"
+    project_environment:
+      SYMFONY_ENV: "prod"
 
-    - name: Deploying application code
-      unarchive:
-        src: "{{ release_path }}"
-        dest: "{{ deploy_path }}"
-        creates: "{{ deploy_path }}/vendor"
-        copy: yes
-        mode: 0755
-        owner: "{{ app_user }}"
+    project_post_build_commands:
+      - "php vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php"
+      - "app/console cache:clear"
+      - "app/console doctrine:schema:update --force"
+      - "app/console assets:install --relative --symlink"
+      - "app/console assetic:dump"
 
-    - name: Set correct permissions
-      file:
-        path: "{{ deploy_path }}"
-        # mode: 0755
-        owner: "{{ app_user }}"
-        state: directory
-        recurse: true
+  pre_tasks:
+    - name: ensure github.com is a known host
+      lineinfile:
+        dest: ~/.ssh/known_hosts
+        create: yes
+        state: present
+        line: "{{ lookup('pipe', 'ssh-keyscan -t rsa github.com') }}"
+        regexp: "^github\\.com"
 
-    - name: configuration
-      template:
-        src: templates/parameters.j2
-        dest: "{{ deploy_path }}/app/config/parameters.yml"
-        mode: 0600
+    - name: Set composer github token
+      command: "{{ project_composer_binary }} config -g github-oauth.github.com {{ github_token }}"
+      when: github_token is defined
 
-    - name: environment configuration
-      template:
-        src: templates/.bash_profile
-        dest: "~/.bash_profile"
-        mode: 0600
+  roles:
+       - f500.project_deploy
 
-    - name: Update database
-      command: >
-        ./app/console doctrine:schema:update --force
-      args:
-        chdir: "{{ deploy_path }}"
-      environment: symfony_env
-
-    - name: Link current release
-      file:
-        src: "{{ deploy_path }}"
-        dest: "{{ project_path }}/current"
-        owner: "{{ app_user }}"
-        state: link
-      notify:
-        - restart php-fpm
-
-  handlers:
-    - name: restart php-fpm
-      service: name=php5-fpm state=restarted
-      sudo_user: root
+  post_tasks:
+      - name: Remove old releases
+        deploy_helper: "path={{ project_root }} state=clean"

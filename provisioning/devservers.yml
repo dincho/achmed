@@ -56,7 +56,7 @@
       vagrant:
          - listen 80
          - server_name {{ inventory_hostname }}
-         - root /home/vagrant/web
+         - root /home/vagrant/achmed/web
          - access_log /var/log/nginx/{{ inventory_hostname }}.access_log
          - error_log /var/log/nginx/{{ inventory_hostname }}.error_log
          - "location / { try_files $uri /app.php$is_args$args; }"

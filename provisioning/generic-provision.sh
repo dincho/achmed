@@ -4,4 +4,4 @@ sudo apt-add-repository -y ppa:ansible/ansible
 sudo apt-get update
 sudo apt-get -y install ansible
 cd /home/vagrant/$1/provisioning
-ansible-playbook -i inventary/dev --connection=local --limit devservers site.yml
+ansible-playbook -i inventary/dev --connection=local devservers.yml

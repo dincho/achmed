@@ -55,6 +55,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           s.privileged = false
           s.args   = [PROJECT_NAME]
       end
+    else
+      node.vm.provision "ansible" do |ansible|
+        ansible.playbook = "provisioning/devservers.yml"
+        ansible.host_key_checking = false
+        ansible.groups = {
+          "devservers" => ["dev"],
+          "appservers" => ["app"],
+          "dbservers" => ["db"],
+          "searchservers" => ["search"]
+        }
+      end
     end
 
     node.vm.post_up_message = "Project URL: http://" + PROJECT_NAME + ".dev/app_dev.php"
@@ -89,19 +100,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     node.vm.provider "virtualbox" do |vb|
       vb.name = node.vm.hostname
       vb.customize ["modifyvm", :id, "--memory", "256"]
-    end
-  end
-
-  if not Vagrant::Util::Platform.windows?
-    config.vm.provision "ansible" do |ansible|
-      ansible.playbook = "provisioning/site.yml"
-      ansible.host_key_checking = false
-      ansible.groups = {
-        "devservers" => ["dev"],
-        "appservers" => ["app"],
-        "dbservers" => ["db"],
-        "searchservers" => ["search"]
-      }
     end
   end
 end

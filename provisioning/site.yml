@@ -2,4 +2,3 @@
 - include: appservers.yml
 - include: dbservers.yml
 - include: searchservers.yml
-- include: devservers.yml

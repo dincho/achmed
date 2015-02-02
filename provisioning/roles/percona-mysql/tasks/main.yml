@@ -1,6 +1,6 @@
 ---
 - name: Add Percona apt signing key
-  apt_key: keyserver=keys.gnupg.net id=1C4CBDCDCD2EFD2A state=present
+  apt_key: keyserver=keyserver.ubuntu.com id=1C4CBDCDCD2EFD2A state=present
 
 - name: Add Percona repositories
   apt_repository:

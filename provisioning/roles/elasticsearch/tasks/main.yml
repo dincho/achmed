@@ -1,6 +1,6 @@
 ---
 - name: Add Elasticsearch apt signing key
-  apt_key: keyserver=keys.gnupg.net id=D88E42B4 state=present
+  apt_key: keyserver=keyserver.ubuntu.com id=D88E42B4 state=present
 
 - name: Add Elasticsearch repository
   apt_repository:

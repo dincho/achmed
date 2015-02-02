@@ -1,0 +1,67 @@
+---
+- name: Add Percona apt signing key
+  apt_key: keyserver=keys.gnupg.net id=1C4CBDCDCD2EFD2A state=present
+
+- name: Add Percona repositories
+  apt_repository:
+    repo: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+     - deb http://repo.percona.com/apt {{ ansible_distribution_release }} main
+     - deb-src http://repo.percona.com/apt {{ ansible_distribution_release }} main
+
+- name: Install python packages
+  apt: pkg={{ item }} state=present
+  with_items:
+    - python-mysqldb
+
+- name: Install Percona packages
+  apt: pkg={{ item }} state=present
+  with_items:
+    - percona-server-server-5.6
+    - percona-server-client-5.6
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+  notify:
+    - set root password
+
+#need to set mysql root pass
+- meta: flush_handlers
+
+- name: mysqld is running
+  service: name=mysql state=started enabled=yes
+
+- name: ensure databases exists
+  mysql_db:
+    name: "{{ item.name }}"
+    encoding: "{{ item.encoding | default('utf8') }}"
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    state: present
+  with_items: mysql_databases
+  when: item.name is defined and item.name != ""
+
+- name: ensure database users exists
+  mysql_user:
+    name: "{{ item.name }}"
+    password: "{{ item.password | default(item.name) }}"
+    host: "{{ item.host | default('localhost') }}"
+    priv: "{{ item.database }}.*:ALL"
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    state: present
+  with_items: mysql_users
+  when: item.name is defined and item.name != ""
+
+- name: configure mysqld
+  ini_file:
+    dest: /etc/mysql/my.cnf
+    section: mysqld
+    option: "{{ item.key }}"
+    value: "{{ item.value }}"
+    mode: 0600
+    backup: yes
+  with_dict: mysql_server_config
+  notify:
+    - restart mysql

@@ -1,87 +1,16 @@
 ---
 - name: Configure db servers
-  hosts: dbservers:devservers
+  hosts: dbservers
   sudo: yes
+
   vars:
     mysql_root_password: mysql_root_pass
-    mysql_db_name: "{{ project_name }}"
-    app_hosts:
-      - "127.0.0.1"
-      - localhost
-      - ::1
-  tasks:
-    - name: Add Percona apt signing key
-      apt_key: keyserver=keys.gnupg.net id=1C4CBDCDCD2EFD2A state=present
+    mysql_databases:
+      - { name: achmed }
+    mysql_users:
+      - { name: achmed, password: achmed, database: achmed }
+    mysql_server_config:
+      performance_schema: "off"
 
-    - name: Add Percona repository
-      apt_repository:
-        repo: 'deb http://repo.percona.com/apt {{ ansible_distribution_release }} main'
-        state: present
-
-    - name: Add Percona source repository
-      apt_repository:
-        repo: 'deb-src http://repo.percona.com/apt {{ ansible_distribution_release }} main'
-        state: present
-
-    - name: Install python packages
-      apt: pkg={{ item }} state=present
-      with_items:
-        - python-mysqldb
-
-    - name: Install Percona packages
-      apt: pkg={{ item }} state=present
-      with_items:
-        - percona-server-server
-        - percona-server-client
-      environment:
-        DEBIAN_FRONTEND: noninteractive
-      notify:
-        - set mysql root password
-
-    #need to set mysql root pass
-    - meta: flush_handlers
-
-    - name: disable mysql performance schema because of high memory usage
-      ini_file:
-        dest: /etc/mysql/my.cnf
-        section: mysqld
-        option: performance_schema
-        value: "off"
-        mode: 0600
-        backup: yes
-      notify:
-        - restart mysql
-
-    - name: mysqld is running
-      service: name=mysql state=started enabled=yes
-
-    - name: app database exists
-      mysql_db:
-        name: "{{ mysql_db_name }}"
-        encoding: utf8
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-        state: present
-
-    - name: app database user exists
-      mysql_user:
-        name: "{{ mysql_db_name }}"
-        password: "{{ mysql_db_name }}"
-        host: "{{ item }}"
-        priv: "{{ mysql_db_name }}.*:ALL"
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-        state: present
-      with_items: app_hosts
-
-  handlers:
-    - name: set mysql root password
-      mysql_user: name=root host={{ item }} password={{ mysql_root_password }}
-      with_items:
-        - 127.0.0.1
-        - ::1
-        - localhost
-
-    - name: restart mysql
-      service: name=mysql state=restarted
-
+  roles:
+    - percona-mysql

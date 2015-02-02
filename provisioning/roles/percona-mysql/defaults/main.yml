@@ -1,0 +1,5 @@
+---
+mysql_root_password: mysql_root_pass
+mysql_databases:
+mysql_users:
+mysql_server_config:

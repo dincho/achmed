@@ -72,6 +72,7 @@
     - percona-mysql
     - nbz4live.php-fpm
     - jdauphant.nginx
+    - elasticsearch
 
   post_tasks:
     - name: install nodejs, npm, compass, git

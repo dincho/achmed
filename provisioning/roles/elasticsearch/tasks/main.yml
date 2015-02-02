@@ -1,0 +1,28 @@
+---
+- name: Add Elasticsearch apt signing key
+  apt_key: keyserver=keys.gnupg.net id=D88E42B4 state=present
+
+- name: Add Elasticsearch repository
+  apt_repository:
+    repo: 'deb http://packages.elasticsearch.org/elasticsearch/{{ es_version }}/debian stable main'
+    state: present
+    update_cache: yes
+
+- name: Install Elasticsearch packages
+  apt: pkg={{ item }} state=present
+  with_items:
+    - default-jre-headless
+    - elasticsearch
+
+- name: Start and enable Elasticsearch
+  service: name=elasticsearch state=started enabled=yes
+
+- name: set /etc/default/elasticsearch configuration
+  lineinfile:
+    dest: /etc/default/elasticsearch
+    regexp: "^{{ item.key }}="
+    insertafter: "^#{{ item.key }}="
+    line: "{{ item.key }}={{ item.value }}"
+  with_dict: es_default_config
+  notify:
+   - restart elasticsearch

@@ -11,6 +11,7 @@ Symfony skeleton
 
 ```bash
 vagrant plugin install vagrant-hostmanager vagrant-rsync-back
+ansible-galaxy install nbz4live.php-fpm jdauphant.nginx f500.project_deploy
 ```
 
 ```bash

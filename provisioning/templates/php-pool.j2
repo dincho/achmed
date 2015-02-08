@@ -11,7 +11,3 @@ pm.start_servers = 2
 pm.min_spare_servers = 1
 pm.max_spare_servers = 3
 chdir = /
-
-{% for key,value in symfony_env.iteritems() %}
-env[{{ key }}]="{{ value }}"
-{% endfor -%}

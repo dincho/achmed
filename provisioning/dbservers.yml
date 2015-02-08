@@ -10,7 +10,16 @@
     mysql_users:
       - { name: achmed, password: achmed, database: achmed }
     mysql_server_config:
+      bind-address: "0.0.0.0"
       performance_schema: "off"
 
   roles:
     - percona-mysql
+
+  pre_tasks:
+    - name: Allow app access to tcp port 3306
+      ufw: rule=allow src={{ hostvars[item]['ansible_eth1']['ipv4']['address'] }} port=3306 proto=tcp
+      when: hostvars[item]['ansible_eth1']['ipv4']['address'] is defined
+      with_items: groups.appservers
+
+

@@ -78,8 +78,19 @@
   roles: [nbz4live.php-fpm, jdauphant.nginx]
 
   pre_tasks:
+    - name: Allow all access to tcp port 80
+      ufw: rule=allow port=80 proto=tcp
+
     - name: Create application user
       user:
         name:  achmed
         shell: /bin/bash
-      sudo: yes
+
+    # https://bugs.launchpad.net/ubuntu/+source/php5/+bug/1272788
+    - name: Fix service php5-fpm reload
+      lineinfile:
+        dest: /etc/init/php5-fpm.conf
+        state: present
+        regexp: '^reload'
+        line: "reload signal USR2"
+        insertafter: "^# reload"

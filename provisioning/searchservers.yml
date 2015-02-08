@@ -5,3 +5,9 @@
 
   roles:
     - elasticsearch
+
+  pre_tasks:
+    - name: Allow app access to tcp port 9200
+      ufw: rule=allow src={{ hostvars[item]['ansible_eth1']['ipv4']['address'] }} port=9200 proto=tcp
+      when: hostvars[item]['ansible_eth1']['ipv4']['address'] is defined
+      with_items: groups.appservers

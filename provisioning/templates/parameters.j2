@@ -1,11 +1,12 @@
 # This file is a "template" of what your parameters.yml file should look like
 parameters:
+    version:           {{ deploy_helper.new_release | default('1') }}
     database_driver:   pdo_mysql
-    database_host:     127.0.0.1
-    database_port:     ~
-    database_name:     achmed
-    database_user:     achmed
-    database_password: achmed
+    database_host:     {{ hostvars[groups['dbservers'][0]]['private_ip'] }}
+    database_port:     {{ lookup('env', 'DATABASE_PORT') | default(3306, True) }}
+    database_name:     {{ lookup('env', 'DATABASE_NAME') | default('achmed', True) }}
+    database_user:     {{ lookup('env', 'DATABASE_USER') | default('achmed', True) }}
+    database_password: {{ lookup('env', 'DATABASE_PASSWORD') | default('achmed', True) }}
     # You should uncomment this if you want use pdo_sqlite
     # database_path: "%kernel.root_dir%/data.db3"
 

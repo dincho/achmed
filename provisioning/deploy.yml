@@ -59,5 +59,9 @@
        - f500.project_deploy
 
   post_tasks:
+      - name: reload php5-fpm
+        service: name=php5-fpm state=reloaded
+        remote_user: root
+
       - name: Remove old releases
         deploy_helper: "path={{ project_root }} state=clean"

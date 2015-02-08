@@ -37,9 +37,14 @@
         line: "{{ lookup('pipe', 'ssh-keyscan -t rsa github.com') }}"
         regexp: "^github\\.com"
 
+    - name: Get composer github token
+      command: "{{ project_composer_binary }} config -g github-oauth.github.com"
+      register: github_token_config
+      when: github_token is defined
+
     - name: Set composer github token
       command: "{{ project_composer_binary }} config -g github-oauth.github.com {{ github_token }}"
-      when: github_token is defined
+      when: github_token is defined and github_token_config.stdout == ""
 
   roles:
        - f500.project_deploy

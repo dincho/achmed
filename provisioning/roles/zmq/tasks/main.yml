@@ -1,0 +1,26 @@
+---
+- name: ext-zmq requirements are installed
+  apt: pkg={{ item }} state=installed
+  with_items:
+    - php5-dev
+    - php-pear
+    - libzmq-dev
+    - pkg-config
+
+- name: ext-zmq is installed
+  shell: echo "\n" | pecl install -Z zmq-beta
+  register: pecl_result
+  changed_when: "'already installed' not in pecl_result.stdout"
+  failed_when: "pecl_result.stderr or ('ERROR' in pecl_result.stdout)"
+  notify:
+    - restart php5-fpm
+
+- name: zmq.ini exists
+  ini_file: dest=/etc/php5/mods-available/zmq.ini section=PHP option=extension value=zmq.so mode=0644
+  notify:
+    - restart php5-fpm
+
+- name: zmq module is enabled
+  command: php5enmod zmq creates=/etc/php5/fpm/conf.d/20-zmq.ini
+  notify:
+    - restart php5-fpm

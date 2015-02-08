@@ -86,6 +86,7 @@
         name:  achmed
         shell: /bin/bash
 
+  post_tasks:
     # https://bugs.launchpad.net/ubuntu/+source/php5/+bug/1272788
     - name: Fix service php5-fpm reload
       lineinfile:

@@ -21,6 +21,15 @@
     project_environment:
       SYMFONY_ENV: "prod"
 
+    project_shared_children:
+      - path: "/web/uploads"
+        src: "uploads"
+
+    project_unwanted_items:
+      - .git
+      - web/app_dev.php
+      - provisioning
+
     project_post_build_commands:
       - "php vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php"
       - "app/console cache:clear"
